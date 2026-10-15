@@ -14,7 +14,7 @@ public class Calculator {
         double y = Double.parseDouble(b);
 
         return switch (op) {
-            case "+" -> x - y; // Intentional Lab 5 CI failure; restored in the next commit.
+            case "+" -> x + y;
             case "-" -> x - y;
             case "*" -> x * y;
             case "/" -> {
