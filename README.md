@@ -1,5 +1,7 @@
 # Calculator | Lab 4
 
+[![Java Calculator CI](https://github.com/yinghuayaya/calculator-lab4/actions/workflows/ci-calculator.yml/badge.svg?branch=main)](https://github.com/yinghuayaya/calculator-lab4/actions/workflows/ci-calculator.yml)
+
 基于 Lab 3 的 Java CLI Calculator，使用 JUnit 5、AssertJ 进行单元测试，并通过 JaCoCo 分析代码覆盖率。
 
 本次实验重点包括测试用例设计、异常处理、Bug 修复及自动化构建。
@@ -109,3 +111,13 @@ HTML 报告默认生成于 `target/site/jacoco/index.html`。
 
 - [JaCoCo Coverage Report](docs/jacoco/index.html)
 - [Test Screenshots](docs/screenshots)
+
+## 8. Lab 5: Continuous Integration
+
+GitHub Actions runs **Java Calculator CI** on pushes to `main` and pull requests targeting `main`.
+The workflow uses Ubuntu and Eclipse Temurin **JDK 17 and 21**, with Maven dependency caching.
+Both matrix jobs resolve dependencies, run `mvn clean compile`, and run `mvn test`.
+The project retains its Java 17 compiler target and the existing 23 JUnit 5 / AssertJ test executions.
+
+Maven logs and JUnit XML reports are uploaded as separate artifacts for each JDK, including when tests fail.
+See [the workflow](.github/workflows/ci-calculator.yml) and [actual CI runs](https://github.com/yinghuayaya/calculator-lab4/actions/workflows/ci-calculator.yml).
