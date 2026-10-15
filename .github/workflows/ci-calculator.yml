@@ -1,0 +1,56 @@
+name: Java Calculator CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17', '21']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+          cache-dependency-path: pom.xml
+
+      - name: Check Maven dependencies
+        run: |
+          mkdir -p ci-logs
+          mvn -B -ntp dependency:resolve dependency:tree 2>&1 | tee ci-logs/dependencies.log
+
+      - name: Maven Compile
+        run: mvn -B -ntp clean compile 2>&1 | tee ci-logs/compile.log
+
+      - name: Maven Test
+        run: mvn -B -ntp test 2>&1 | tee ci-logs/test.log
+
+      - name: Preserve Maven logs and JUnit results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: calculator-jdk-${{ matrix.java }}-results
+          path: |
+            ci-logs/
+            target/surefire-reports/
+            target/jacoco.exec
+          retention-days: 90
