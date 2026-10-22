@@ -121,3 +121,56 @@ The project retains its Java 17 compiler target and the existing 23 JUnit 5 / As
 
 Maven logs and JUnit XML reports are uploaded as separate artifacts for each JDK, including when tests fail.
 See [the workflow](.github/workflows/ci-calculator.yml) and [actual CI runs](https://github.com/yinghuayaya/calculator-lab4/actions/workflows/ci-calculator.yml).
+
+## 9. Lab 6: Containerization
+
+Use JDK 17 and Maven to build a standalone executable JAR:
+
+```sh
+mvn clean test
+mvn clean package
+java -jar target/calculator-1.0-SNAPSHOT.jar
+java -jar target/calculator-1.0-SNAPSHOT.jar 10 / 5
+```
+
+The default run evaluates `12 + 3`, `12 - 3`, `12 * 3`, and `12 / 3` through
+the original calculator. The three-argument interface still prints one numeric
+result. Maven Shade includes Apache Commons Lang and sets `Main-Class: com.yi.App`.
+
+Build and run the Linux image with Docker Desktop or Docker Engine:
+
+```sh
+docker build -t calculator:v1 .
+docker images
+docker run --rm calculator:v1
+docker run --rm calculator:v1 10 / 5
+bash scripts/verify-container.sh
+```
+
+The multi-stage Dockerfile runs all 23 existing JUnit/AssertJ test executions
+in a Maven/Temurin 17 build stage. Only the shaded JAR is copied into the
+Temurin 17 JRE runtime image. The process runs as UID/GID 10001.
+
+The existing GitHub Actions workflow retains the main-branch push/pull-request
+triggers and JDK 17/21 tests. A dependent Docker job builds the image, verifies
+all four operations and division-by-zero rejection, and preserves its logs.
+There is no automatic registry publishing and no Docker Hub secret in CI.
+
+For a manual release after Docker Hub browser authentication:
+
+```sh
+docker login
+docker tag calculator:v1 yinghuayaya/calculator:lab6
+docker push yinghuayaya/calculator:lab6
+docker pull yinghuayaya/calculator:lab6
+docker run --rm yinghuayaya/calculator:lab6
+```
+
+On Windows paths containing non-ASCII characters, if the JaCoCo report says
+its data file is missing, use relative paths for both the agent and report:
+
+```sh
+mvn clean verify -Djacoco.destFile=target/jacoco.exec -Djacoco.dataFile=target/jacoco.exec
+```
+
+Earlier sections describe Lab 4/5 evidence; new run records determine Lab 6 outcomes.

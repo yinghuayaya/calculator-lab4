@@ -54,3 +54,33 @@ jobs:
             target/surefire-reports/
             target/jacoco.exec
           retention-days: 90
+
+  docker:
+    name: Build and verify Docker image (JDK 17)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build Docker image
+        run: |
+          mkdir -p ci-logs
+          docker build --progress=plain -t calculator:v1 . 2>&1 | tee ci-logs/docker-build.log
+
+      - name: Verify container arithmetic
+        run: |
+          docker images calculator:v1 | tee ci-logs/docker-images.log
+          bash scripts/verify-container.sh 2>&1 | tee ci-logs/container-test.log
+
+      - name: Preserve Docker logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: calculator-docker-results
+          path: ci-logs/
+          retention-days: 90
