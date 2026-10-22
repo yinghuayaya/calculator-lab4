@@ -167,10 +167,20 @@ docker run --rm yinghuayaya/calculator:lab6
 ```
 
 On Windows paths containing non-ASCII characters, if the JaCoCo report says
-its data file is missing, use relative paths for both the agent and report:
+its data file is missing, map the existing project to an unused ASCII drive
+letter for verification (PowerShell; do not replace an existing drive):
 
-```sh
-mvn clean verify -Djacoco.destFile=target/jacoco.exec -Djacoco.dataFile=target/jacoco.exec
+```powershell
+$project = (Get-Location).Path
+if (Test-Path L:\) { throw 'Choose an unused drive letter.' }
+subst.exe L: $project
+try {
+    Set-Location L:\
+    mvn clean verify
+} finally {
+    Set-Location $project
+    subst.exe L: /D
+}
 ```
 
 Earlier sections describe Lab 4/5 evidence; new run records determine Lab 6 outcomes.
